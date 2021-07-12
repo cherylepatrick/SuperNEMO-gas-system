@@ -26,6 +26,16 @@ with open('data/Up_Pressure_Empty_1.txt') as csv_file:
 print(f'Processed {line_count} lines.')
 
 print(f'Dictionary contains {len(dict)} entries')
+
+lists = sorted(dict.items()) # sorted by key, return a list of tuples
+
+timestamps, values = zip(*lists) # unpack a list of pairs into two tuples
+fig, ax = plt.subplots()
+ax.plot(timestamps, values)
+ax.set_xlabel("timestamp")
+ax.set_ylabel("value")
+plt.savefig("test.png")
+
 # Plot some crap to test matplotlib
 #def true_f(x):
 #  return f(x,[2.0,0.5])
