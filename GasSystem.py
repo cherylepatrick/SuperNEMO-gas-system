@@ -12,6 +12,7 @@ mpl.rcParams["legend.frameon"] = False
 mpl.rcParams['figure.dpi']=200 # dots per inch
 
 # Read CSV file
+dict={} # Create an empty dictionary
 with open('data/Up_Pressure_Empty_1.txt') as csv_file:
   csv_reader = csv.reader(csv_file, delimiter=';')
   line_count = 0
@@ -20,11 +21,11 @@ with open('data/Up_Pressure_Empty_1.txt') as csv_file:
     # Parse the date to the nearest microsecond
     # looks like it's always GMT so don't worry about that
     timestamp = datetime.strptime(row[0][0:24],'%m/%d/%y %H:%M:%S.%f')
-    #print(f'{timestamp}: {row[1]}')
+    dict[timestamp]=row[1] #Hopefully this deals with deduplicating
     line_count += 1
 print(f'Processed {line_count} lines.')
 
-
+print(f'Dictionary contains {len(dict)} entries')
 # Plot some crap to test matplotlib
 #def true_f(x):
 #  return f(x,[2.0,0.5])
