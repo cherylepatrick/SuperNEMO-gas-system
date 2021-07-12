@@ -40,6 +40,7 @@ def plot(dict, output_filename):
   ax.set_ylabel("Pressure")
   plt.savefig(output_filename+".png")
 
+# Is this position the first in a slope?
 def is_slope_start (values, pos):
   # We can refine this later, for now I am going to say:
   # - 1) This value must be less than the next value
@@ -54,17 +55,44 @@ def is_slope_start (values, pos):
   if np.mean(values[pos+1:pos+3]) >= np.mean(values[pos+2:pos+4]): return False
   return True
 
+# Is this position the start of a plateau/downwards slope?
+def is_slope_end (values, pos):
+  # We can refine this later, for now I am going to say:
+  # - 1) This value is greater than or equal to the next
+  # - 2) from this point, the average of readings 0-2 >= 1-3 >= 2-4
+  if pos + 5 > len(values):
+    return False # No room for this kerfuffle
+  if values[pos] < values[pos+1]: return False # condition 1
+  if (np.mean(values[pos:pos+2]) < np.mean(values[pos+1:pos+3]) and
+      np.mean(values[pos+1:pos+3]) < np.mean(values[pos+2:pos+4])): return False
+  return True
+
+# Get the position of the start of the next slope after this position
 def find_next_slope(timestamps, values, position):
   current_pos = position
   list_length=len(values)
   while current_pos < list_length:
     if is_slope_start(values, current_pos):
-      return current_pos, timestamps[current_pos], timestamps[-1], 0
+      start_time=current_pos
+      new_pos = find_slope_end(values, current_pos)
+      return new_pos, timestamps[current_pos], timestamps[new_pos], 0
     else:
       current_pos +=1
-  return -2, timestamps[-1], timestamps[-1], 0
-      
-
+  return -999, timestamps[-1], timestamps[-1], 0 #Return value -999 means STOP
+ 
+# Get the position of the end of the slope in progress
+def find_slope_end(values, position):
+   current_pos = position
+   list_length=len(values)
+   while current_pos < list_length:
+     if is_slope_end(values, current_pos):
+       return current_pos
+     else:
+       current_pos +=1
+   return list_length, timestamps[-1]
+ 
+ 
+# Get a vector of slopes
 def find_slopes(dict):
   slopes = []
   # Sort the value/timestamp pairs by time
@@ -72,13 +100,12 @@ def find_slopes(dict):
   timestamps, values = zip(*lists)
   list_position = 0 # Start at the beginning of the list
 
-  # Keep looking for slopes, if we don't find one, return -2
+  # Keep looking for slopes, if we don't find one, return -999 (so we don't just add 1 to it and end up back at the start!)
   while list_position >= 0:
     list_position, start_time, end_time, slope  = find_next_slope(timestamps,values,list_position)
-    print (f'Position is {list_position}')
+    if list_position >=0:
+      print (f'Slope found from {start_time} to {end_time}')
     list_position +=1
-    print (f'Slope found at {start_time}')
-    return
   return slopes
 
  # Read all CSV files to a dictionary of timestamp vs. value
