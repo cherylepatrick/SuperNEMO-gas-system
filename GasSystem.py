@@ -17,7 +17,7 @@ def parse_files(filenames):
         # Parse the date to the nearest microsecond
         # looks like it's always GMT so don't worry about that
         timestamp = datetime.strptime(row[0][0:24],'%m/%d/%y %H:%M:%S.%f')
-        dict[timestamp]=row[1] #Hopefully this deals with deduplicating
+        dict[timestamp]=float(row[1]) #Hopefully this deals with deduplicating
         line_count += 1
       print(f'{filename} contained {line_count} lines.')
   return dict
@@ -41,6 +41,7 @@ fig, ax = plt.subplots()
 ax.plot(timestamps, values)
 ax.set_xlabel("Timestamp")
 ax.set_ylabel("Value")
+#ax.set_ylim(bottom=-0.1,top=2)
 plt.savefig("test.png")
 
 
