@@ -73,7 +73,6 @@ def find_next_slope(timestamps, values, position):
   list_length=len(values)
   while current_pos < list_length:
     if is_slope_start(values, current_pos):
-      start_time=current_pos
       new_pos = find_slope_end(values, current_pos)
       return new_pos, timestamps[current_pos], timestamps[new_pos], 0
     else:
@@ -89,7 +88,7 @@ def find_slope_end(values, position):
        return current_pos
      else:
        current_pos +=1
-   return list_length, timestamps[-1]
+   return list_length
  
  
 # Get a vector of slopes
