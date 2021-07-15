@@ -122,7 +122,7 @@ def find_slopes(dict):
   while list_position >= 0:
     list_position, start_time, end_time, slope  = find_next_slope(timestamps,values,list_position)
     if list_position >=0:
-      print (f'Ramp of {slope:.2} bar/min from {start_time.strftime("%d/%m %H:%M:%S")} to {end_time.strftime("%H:%M:%S")}')
+      print (f'Ramp of {slope:.3} bar/min from {start_time.strftime("%d/%m %H:%M:%S")} to {end_time.strftime("%H:%M:%S")}')
 
     list_position +=1
     slopes.append(slope)
@@ -134,9 +134,9 @@ input_files=['data/Up_Pressure_Empty_1.txt',
     'data/Up_Pressure_Empty_2.txt',
     'data/Up_Pressure_Filled_1.txt',
     'data/Up_Pressure_Filled_2.txt']
-dict=parse_files(input_files)
-plot (dict,'pressures')
-find_slopes(dict)
+dict=parse_files(input_files) # Read file contents into dictionary of timestamps and pressures
+plot (dict,'pressures') # Plot them
+find_slopes(dict) # Extract a list of slopes
 
 
 
