@@ -2,13 +2,15 @@ import numpy as np  #import the numpy library as np
 import matplotlib.pyplot as plt #import the pyplot library as plt
 import matplotlib.style #Some style nonsense
 import matplotlib as mpl #Some more style nonsense
+from scipy import stats
+
+import csv # To read the input files
+from datetime import datetime # To parse the dates and times
+
 
 mpl.rcParams["legend.frameon"] = False
 mpl.rcParams['figure.dpi']=200 # dots per inch
 
-
-import csv # To read the input files
-from datetime import datetime # To parse the dates and times
 
 # Read timestamps / pressures from CSV files and return as a dictionary
 # Takes a list of filenames, reads the lot, deduplicates as necessary
@@ -67,6 +69,19 @@ def is_slope_end (values, pos):
       np.mean(values[pos+1:pos+3]) < np.mean(values[pos+2:pos+4])): return False
   return True
 
+def calculate_slope(timestamps, values, start_pos, end_pos):
+  # start_pos corresponds to the last entry before the slope begins
+  # end_pos is the last entry before it flattens
+  # to make sure we're only fitting the sloping part, fit between
+  # start_pos+1 and end_pos
+  timestamp_subset = timestamps[start_pos+1:end_pos+1]
+  x=[]
+  for ts in timestamp_subset:
+    x.append(ts.timestamp())
+  y = values[start_pos+1:end_pos+1]
+  slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
+  return slope * 60 # convert to bars per minute (from per second)
+
 # Get the position of the start of the next slope after this position
 def find_next_slope(timestamps, values, position):
   current_pos = position
@@ -74,7 +89,11 @@ def find_next_slope(timestamps, values, position):
   while current_pos < list_length:
     if is_slope_start(values, current_pos):
       new_pos = find_slope_end(values, current_pos)
-      return new_pos, timestamps[current_pos], timestamps[new_pos], 0
+      # current_pos is the entry BEFORE the rise
+      # new_pos is the last entry in the rise
+      # Calculate the slope between them
+      slope = calculate_slope(timestamps, values, current_pos, new_pos)
+      return new_pos, timestamps[current_pos], timestamps[new_pos], slope
     else:
       current_pos +=1
   return -999, timestamps[-1], timestamps[-1], 0 #Return value -999 means STOP
@@ -103,8 +122,10 @@ def find_slopes(dict):
   while list_position >= 0:
     list_position, start_time, end_time, slope  = find_next_slope(timestamps,values,list_position)
     if list_position >=0:
-      print (f'Slope found from {start_time} to {end_time}')
+      print (f'Ramp of {slope:.2} bar/min from {start_time.strftime("%d/%m %H:%M:%S")} to {end_time.strftime("%H:%M:%S")}')
+
     list_position +=1
+    slopes.append(slope)
   return slopes
 
  # Read all CSV files to a dictionary of timestamp vs. value
