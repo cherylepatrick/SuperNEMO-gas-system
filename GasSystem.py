@@ -12,10 +12,12 @@ mpl.rcParams["legend.frameon"] = False
 mpl.rcParams['figure.dpi']=200 # dots per inch
 
 
-# Read timestamps / pressures from CSV files and return as a dictionary
-# Takes a list of filenames, reads the lot, deduplicates as necessary
-# (If two entries for the same time, it will use the latest)
 def parse_files(filenames):
+  """
+  Takes a list of paths to CSV files in gas system format.
+  Reads the files and returns a dictionary of timestamp to pressure.
+  If there are multiple records for the same time, it will overwrite.
+  """
   dict={}
   for filename in filenames:
     with open(filename) as csv_file:
@@ -32,8 +34,10 @@ def parse_files(filenames):
   print(f'Total: {len(dict)} readings')
   return dict
 
-# Takes a dictionary of timestamps vs pressures and plots it
 def plot(dict, output_filename):
+  """
+  Takes a dictionary of timestamps vs pressures and plots it
+  """
   lists = sorted(dict.items()) # sorted by key, return a list of tuples
   timestamps, values = zip(*lists) # unpack a list of pairs into two tuples
   fig, ax = plt.subplots()
@@ -42,8 +46,12 @@ def plot(dict, output_filename):
   ax.set_ylabel("Pressure")
   plt.savefig(output_filename+".png")
 
-# Is this position the first in a slope?
+
 def is_slope_start (values, pos):
+  """
+  Is this position in list of values the first in an increasing slope?
+  Return true if yes
+  """
   # We can refine this later, for now I am going to say:
   # - 1) This value must be less than the next value
   # - 2) The average of this value and the next 4 must be less than the
@@ -57,8 +65,11 @@ def is_slope_start (values, pos):
   if np.mean(values[pos+1:pos+3]) >= np.mean(values[pos+2:pos+4]): return False
   return True
 
-# Is this position the start of a plateau/downwards slope?
 def is_slope_end (values, pos):
+  """
+  Is this position in list of values the start of a plateau/downwards slope?
+  Return true if yes
+  """
   # We can refine this later, for now I am going to say:
   # - 1) This value is greater than or equal to the next
   # - 2) from this point, the average of readings 0-2 >= 1-3 >= 2-4
@@ -70,6 +81,10 @@ def is_slope_end (values, pos):
   return True
 
 def calculate_slope(timestamps, values, start_pos, end_pos):
+  """
+  Calculate the slope of a pressure (y axis) vs timestamp (x axis)
+  pair of arrays, between specified start and end positions in the array
+  """
   # start_pos corresponds to the last entry before the slope begins
   # end_pos is the last entry before it flattens
   # to make sure we're only fitting the sloping part, fit between
@@ -82,8 +97,11 @@ def calculate_slope(timestamps, values, start_pos, end_pos):
   slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
   return slope * 60 # convert to bars per minute (from per second)
 
-# Get the position of the start of the next slope after this position
 def find_next_slope(timestamps, values, position):
+  """
+  Find the start time, end time, and slope of the next rising slope after
+  the specified position in the array of timestamps (x) vs pressures (y)
+  """
   current_pos = position
   list_length=len(values)
   while current_pos < list_length:
@@ -98,20 +116,26 @@ def find_next_slope(timestamps, values, position):
       current_pos +=1
   return -999, timestamps[-1], timestamps[-1], 0 #Return value -999 means STOP
  
-# Get the position of the end of the slope in progress
+
 def find_slope_end(values, position):
-   current_pos = position
-   list_length=len(values)
-   while current_pos < list_length:
-     if is_slope_end(values, current_pos):
-       return current_pos
-     else:
-       current_pos +=1
-   return list_length
+  """
+    Get the position of the end of the slope in progress
+  """
+  current_pos = position
+  list_length=len(values)
+  while current_pos < list_length:
+    if is_slope_end(values, current_pos):
+      return current_pos
+    else:
+      current_pos +=1
+  return list_length
  
  
-# Get a vector of slopes
 def find_slopes(dict):
+  """
+    Get a list of all rising slopes found in the dataset of
+    timestamps (x) vs pressures (y)
+  """
   slopes = []
   # Sort the value/timestamp pairs by time
   lists = sorted(dict.items())
@@ -128,8 +152,10 @@ def find_slopes(dict):
     slopes.append(slope)
   return slopes
 
- # Read all CSV files to a dictionary of timestamp vs. value
- # That should deduplicate, so the individual totals don't necessarily add up to the final total
+
+# Main function
+# Read all CSV files to a dictionary of timestamp vs. value
+# That should deduplicate, so the individual totals don't necessarily add up to the final total
 input_files=['data/Up_Pressure_Empty_1.txt',
     'data/Up_Pressure_Empty_2.txt',
     'data/Up_Pressure_Filled_1.txt',
