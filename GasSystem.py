@@ -52,17 +52,22 @@ def is_slope_start (pressures, pos):
   Is this position in list of pressures the first in an increasing slope?
   Return true if yes
   """
+  # From the examples we have, it seems like the noise is quite a bit less than
+  # a real rise. Let's say a real rise has magnitude 0.01
+  expected_rise = 0.01
+  
   # We can refine this later, for now I am going to say:
-  # - 1) This pressure must be less than the next pressure
+  # - 1) This pressure must be less than the next pressure by the expected amount
   # - 2) The average of this pressure and the next 4 must be less than the
-  #   average of the following 5 pressures
+  #   average of the following 5 pressures by 5 times the expected amount
   # - 3) from this point, the average of readings 0-2 < 1-3 < 2-4
+
   if pos + 10 > len(pressures):
     return False # No room for this kerfuffle
-  if pressures[pos] >= pressures[pos+1]: return False # condition 1
-  if np.mean(pressures[pos:pos+4]) >= np.mean(pressures[pos+5:pos+9]): return False
-  if np.mean(pressures[pos:pos+2]) >= np.mean(pressures[pos+1:pos+3]): return False
-  if np.mean(pressures[pos+1:pos+3]) >= np.mean(pressures[pos+2:pos+4]): return False
+  if pressures[pos+1] - pressures[pos] < expected_rise: return False # condition 1
+  if np.mean(pressures[pos+5:pos+9]) - np.mean(pressures[pos:pos+4]) < expected_rise * 5 : return False
+  if np.mean(pressures[pos+1:pos+3]) - np.mean(pressures[pos:pos+2]) < expected_rise : return False
+  if np.mean(pressures[pos+2:pos+4]) - np.mean(pressures[pos+1:pos+3]) < expected_rise : return False
   return True
 
 def is_slope_end (pressures, pos):
@@ -163,9 +168,3 @@ input_files=['data/Up_Pressure_Empty_1.txt',
 dict=parse_files(input_files) # Read file contents into dictionary of timestamps and pressures
 plot (dict,'pressures') # Plot them
 find_slopes(dict) # Extract a list of slopes
-
-
-
-
-
-
