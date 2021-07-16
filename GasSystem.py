@@ -90,15 +90,15 @@ def calculate_slope(timestamps, pressures, start_pos, end_pos):
   Calculate the slope of a pressure (y axis) vs timestamp (x axis)
   pair of arrays, between specified start and end positions in the array
   """
-  # start_pos corresponds to the last entry before the slope begins
+  # start_pos corresponds to the first entry after the slope starts
   # end_pos is the last entry before it flattens
   # to make sure we're only fitting the sloping part, fit between
-  # start_pos+1 and end_pos
-  timestamp_subset = timestamps[start_pos+1:end_pos+1]
+  # start_pos and end_pos
+  timestamp_subset = timestamps[start_pos:end_pos+1]
   x=[]
   for ts in timestamp_subset:
     x.append(ts.timestamp())
-  y = pressures[start_pos+1:end_pos+1]
+  y = pressures[start_pos:end_pos+1]
   slope, intercept, r_pressure, p_pressure, std_err = stats.linregress(x,y)
   return slope * 60 # convert to bars per minute (from per second)
 
@@ -114,9 +114,9 @@ def find_next_slope(timestamps, pressures, position):
       new_pos = find_slope_end(pressures, current_pos)
       # current_pos is the entry BEFORE the rise
       # new_pos is the last entry in the rise
-      # Calculate the slope between them
-      slope = calculate_slope(timestamps, pressures, current_pos, new_pos)
-      return new_pos, timestamps[current_pos], timestamps[new_pos], slope
+      # Calculate the slope between the ones actually in it
+      slope = calculate_slope(timestamps, pressures, current_pos+1, new_pos)
+      return new_pos, timestamps[current_pos+1], timestamps[new_pos], slope
     else:
       current_pos +=1
   return -999, timestamps[-1], timestamps[-1], 0 #Return pressure -999 means STOP
