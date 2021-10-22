@@ -1,3 +1,10 @@
+# Gas System slope finder
+# C Patrick July 2021
+# Read  whitespace-separated files of times and pressures from the
+# SuperNEMO gas system, dedupe them, and then plot pressure v time.
+# Search for rising slopes, output the start and end times of the ramp-up
+# and calculate the slope of each (linear regression)
+
 import numpy as np  #import the numpy library as np
 import matplotlib.pyplot as plt #import the pyplot library as plt
 import matplotlib.style #Some style nonsense
