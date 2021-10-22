@@ -27,5 +27,12 @@ data/second_datafile.txt
  
  Takes an input file pasted from the gasy system's Raspberry Pi command line, and reformats it to the datafile format shown above, so that it can be processed by  `GasSystem.py`. Use it like this: `python Reformat.py <input file> <output file>`
  
- 
- 
+ Here's an example of the input it can deal with:
+ ```
+ supernemo@sn-rpi1:~/PressureMonitoring$ python EV94.py d
+22/10/2021 15:10:06 : Current Pressure: 0.798
+supernemo@sn-rpi1:~/PressureMonitoring$ python EV94.py d
+22/10/2021 15:10:09 : Current Pressure: 0.816
+supernemo@sn-rpi1:~/PressureMonitoring$ python EV94.py d
+22/10/2021 15:10:11 : Current Pressure: 0.827
+ ```
