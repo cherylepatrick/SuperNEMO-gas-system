@@ -25,7 +25,7 @@ data/second_datafile.txt
  
  ## Reformat.py
  
- Takes an input file pasted from the gasy system's Raspberry Pi command line, and reformats it to the datafile format shown above, so that it can be processed by ` `GasSystem.py`. Use it like this: ` python Reformat.py <input file> <output file>`
+ Takes an input file pasted from the gasy system's Raspberry Pi command line, and reformats it to the datafile format shown above, so that it can be processed by  `GasSystem.py`. Use it like this: `python Reformat.py <input file> <output file>`
  
  
  
