@@ -140,7 +140,7 @@ def find_slope_end(pressures, position):
       return current_pos
     else:
       current_pos +=1
-  return list_length
+  return list_length-1 #Corresponds to the last point
  
  
 def find_slopes(dict):
@@ -168,10 +168,11 @@ def find_slopes(dict):
 # Main function
 # Read all CSV files to a dictionary of timestamp vs. pressure
 # That should deduplicate, so the individual totals don't necessarily add up to the final total
-input_files=['data/Up_Pressure_Empty_1.txt',
-    'data/Up_Pressure_Empty_2.txt',
-    'data/Up_Pressure_Filled_1.txt',
-    'data/Up_Pressure_Filled_2.txt']
+#input_files=['data/Up_Pressure_Empty_1.txt',
+#    'data/Up_Pressure_Empty_2.txt',
+#    'data/Up_Pressure_Filled_1.txt',
+#    'data/Up_Pressure_Filled_2.txt']
+input_files=['data/ParsedOct22.txt']
 dict=parse_files(input_files) # Read file contents into dictionary of timestamps and pressures
 plot (dict,'pressures') # Plot them
 find_slopes(dict) # Extract a list of slopes
