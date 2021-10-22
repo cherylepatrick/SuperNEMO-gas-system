@@ -5,6 +5,8 @@
 # Search for rising slopes, output the start and end times of the ramp-up
 # and calculate the slope of each (linear regression)
 
+import argparse
+import sys
 import numpy as np  #import the numpy library as np
 import matplotlib.pyplot as plt #import the pyplot library as plt
 import matplotlib.style #Some style nonsense
@@ -168,11 +170,27 @@ def find_slopes(dict):
 # Main function
 # Read all CSV files to a dictionary of timestamp vs. pressure
 # That should deduplicate, so the individual totals don't necessarily add up to the final total
-#input_files=['data/Up_Pressure_Empty_1.txt',
-#    'data/Up_Pressure_Empty_2.txt',
-#    'data/Up_Pressure_Filled_1.txt',
-#    'data/Up_Pressure_Filled_2.txt']
-input_files=['data/ParsedOct22.txt']
+# Allow a single datafile name, or a file containing a list of data files
+
+
+parser = argparse.ArgumentParser(description='Identify any rising slopes from one or more files of pressure readings from the SuperNEMO gas system.')
+parser.add_argument('filename',
+                    help='Datafile path/name (or file containing list of names)')
+parser.add_argument('--list', dest='filelist', action='store_const',
+const=True, default=False,
+                    help='Process a file containing a list of datafile names, rather than an individual datafile')
+
+args = parser.parse_args()
+
+input_files=[]
+if (args.filelist): # Input filename is a file containing a list of paths/names of individual datafiles
+  with open(args.filename) as file_in:
+    for line in file_in:
+        input_files.append(line. rstrip("\n"))
+  file_in.close()
+else:
+  input_files.append(args.filename) # Just process a single datafile
+
 dict=parse_files(input_files) # Read file contents into dictionary of timestamps and pressures
 plot (dict,'pressures') # Plot them
 find_slopes(dict) # Extract a list of slopes
